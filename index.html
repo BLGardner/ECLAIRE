@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECLAIRE — Conceptual AI Architecture Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg:        #f5f2ed;
+      --surface:   #faf8f5;
+      --border:    #ddd8d0;
+      --accent:    #8a6930;
+      --accent2:   #2e6a8a;
+      --text:      #3a3530;
+      --muted:     #8a8278;
+      --heading:   #1a1610;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+      --serif:     'Playfair Display', serif;
+      color-scheme: light;
+    }
+
+    html.dark {
+      --bg:        #0a0c0f;
+      --surface:   #111318;
+      --border:    #1e2229;
+      --accent:    #c8a96e;
+      --accent2:   #5b8fa8;
+      --text:      #d4d8de;
+      --muted:     #5a6070;
+      --heading:   #eef0f4;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { transition: background 0.25s, color 0.25s; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 2rem 2.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    header h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+    }
+
+    .tagline {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--muted);
+      border-left: 2px solid var(--accent);
+      padding-left: 1rem;
+      max-width: 600px;
+    }
+
+    /* ── Tab Navigation ── */
+    nav {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 0;
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.75rem 1.5rem;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-btn .doc-label {
+      display: block;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: 0.02em;
+      margin-top: 0.15rem;
+      font-weight: 300;
+    }
+
+    .tab-btn.active .doc-label { color: var(--accent2); }
+
+    /* ── Document Panel ── */
+    .doc-panel {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: none;
+    }
+    .doc-panel.active { display: block; }
+
+    .doc-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .doc-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      text-decoration: none;
+      border: 1px solid var(--accent2);
+      padding: 0.4rem 0.85rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .download-link:hover {
+      background: var(--accent2);
+      color: var(--bg);
+    }
+
+    /* ── Loading / Error states ── */
+    .status {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 3rem 0;
+      text-align: center;
+    }
+
+    .status.error {
+      color: #c07070;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 12px 0 0 var(--accent), 24px 0 0 var(--accent);
+      animation: dots 1s infinite;
+      margin-right: 1.5rem;
+    }
+
+    @keyframes dots {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* ── Rendered Document Content ── */
+    .doc-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 3rem 3.5rem;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 600px) {
+      .doc-content { padding: 1.5rem; }
+      nav { padding: 1rem 1rem 0; }
+      .tab-btn { padding: 0.6rem 0.85rem; }
+      header { padding: 2rem 1rem 1.5rem; }
+      .doc-panel { padding: 1rem; }
+    }
+
+    /* mammoth-rendered content styles */
+    .doc-content h1 {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 2rem 0 1rem;
+      line-height: 1.2;
+    }
+    .doc-content h2 {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--heading);
+      margin: 1.8rem 0 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-content h3 {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 1.5rem 0 0.5rem;
+    }
+    .doc-content h4, .doc-content h5, .doc-content h6 {
+      font-family: var(--sans);
+      font-weight: 500;
+      color: var(--heading);
+      margin: 1rem 0 0.4rem;
+    }
+    .doc-content p {
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .doc-content ul, .doc-content ol {
+      margin: 0.75rem 0 1rem 1.5rem;
+      color: var(--text);
+    }
+    .doc-content li { margin-bottom: 0.35rem; }
+    .doc-content strong { color: var(--heading); font-weight: 500; }
+    .doc-content em { color: var(--accent); font-style: italic; }
+    .doc-content blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 1.5rem 0;
+      padding: 0.5rem 1.25rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .doc-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    .doc-content th {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    .doc-content td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 0.75rem;
+      color: var(--text);
+    }
+    .doc-content tr:last-child td { border-bottom: none; }
+    .doc-content a { color: var(--accent2); }
+
+    /* ── Theme Toggle ── */
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.35rem 0.75rem;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .theme-toggle:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    /* ── Footer ── */
+    footer {
+      max-width: 900px;
+      margin: 4rem auto 0;
+      padding: 1.5rem 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    footer span {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <p class="eyebrow">Conceptual AI Architecture Framework</p>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+        <span id="theme-icon">☽</span>
+        <span id="theme-label">Dark</span>
+      </button>
+    </div>
+    <h1><span>ECLAIRE</span></h1>
+    <p class="subtitle">Embodied Curriculum Learning with Abstraction, Inference and Retrieval</p>
+    <p class="tagline">"The front door works. But it may not be the only entrance to the house."</p>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" onclick="showTab('framework', this)">
+      Framework
+      <span class="doc-label">Primary Architecture Paper</span>
+    </button>
+    <button class="tab-btn" onclick="showTab('addendum', this)">
+      Addendum I
+      <span class="doc-label">Dual Agency &amp; Alignment</span>
+    </button>
+  </nav>
+
+  <!-- Framework Panel -->
+  <div id="panel-framework" class="doc-panel active">
+    <div class="doc-toolbar">
+      <span class="doc-meta">ECLAIR_Framework.docx</span>
+      <a class="download-link"
+         href="https://raw.githubusercontent.com/BLGardner/ECLAIRE/main/ECLAIR_Framework.docx"
+         download="ECLAIR_Framework.docx">
+        ↓ Download .docx
+      </a>
+    </div>
+    <div id="content-framework" class="doc-content">
+      <p class="status"><span class="loader"></span> Loading document…</p>
+    </div>
+  </div>
+
+  <!-- Addendum Panel -->
+  <div id="panel-addendum" class="doc-panel">
+    <div class="doc-toolbar">
+      <span class="doc-meta">ECLAIR_Addendum.docx</span>
+      <a class="download-link"
+         href="https://raw.githubusercontent.com/BLGardner/ECLAIRE/main/ECLAIR_Addendum.docx"
+         download="ECLAIR_Addendum.docx">
+        ↓ Download .docx
+      </a>
+    </div>
+    <div id="content-addendum" class="doc-content">
+      <p class="status">Click the Addendum tab to load.</p>
+    </div>
+  </div>
+
+  <footer>
+    <span>Released to the public domain. No rights reserved.</span>
+    <span><a href="https://github.com/BLGardner/ECLAIRE" target="_blank">GitHub Repository ↗</a></span>
+  </footer>
+
+  <script>
+    let dark = false;
+
+    function toggleTheme() {
+      dark = !dark;
+      document.documentElement.classList.toggle('dark', dark);
+      document.getElementById('theme-icon').textContent  = dark ? '☀' : '☽';
+      document.getElementById('theme-label').textContent = dark ? 'Light' : 'Dark';
+    }
+
+    const RAW = 'https://raw.githubusercontent.com/BLGardner/ECLAIRE/main/';
+    const files = {
+      framework: 'ECLAIR_Framework.docx',
+      addendum:  'ECLAIR_Addendum.docx'
+    };
+    const loaded = {};
+
+    async function loadDoc(key) {
+      if (loaded[key]) return;
+      const el = document.getElementById('content-' + key);
+      el.innerHTML = '<p class="status"><span class="loader"></span> Loading document…</p>';
+      try {
+        const res = await fetch(RAW + files[key]);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const buf = await res.arrayBuffer();
+        const result = await mammoth.convertToHtml({ arrayBuffer: buf });
+        el.innerHTML = result.value || '<p class="status">Document rendered (no content).</p>';
+        loaded[key] = true;
+      } catch (err) {
+        el.innerHTML = `
+          <p class="status error">
+            Could not render document inline.<br><br>
+            Use the <strong>Download .docx</strong> button above to open it in Word or a compatible app.
+          </p>`;
+      }
+    }
+
+    function showTab(key, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.doc-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + key).classList.add('active');
+      loadDoc(key);
+    }
+
+    // Load framework on page open
+    loadDoc('framework');
+  </script>
+</body>
+</html>
